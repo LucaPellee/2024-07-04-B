@@ -12,6 +12,7 @@ class State:
     _Population: int
     _Neighbors: []
 
+
     @property
     def id(self):
         return self._id
