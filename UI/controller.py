@@ -57,5 +57,10 @@ class Controller:
         self._view.update_page()
 
     def handle_path(self, e):
-        pass
+        path, punteggio = self._model.getPath()
+        self._view.txt_result2.controls.clear()
+        self._view.txt_result2.controls.append(ft.Text(f"Costo Cammino: {punteggio}"))
+        for i in path:
+            self._view.txt_result2.controls.append(ft.Text(f"{i} - {i.duration}"))
+        self._view.update_page()
 

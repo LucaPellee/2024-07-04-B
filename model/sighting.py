@@ -18,6 +18,9 @@ class Sighting:
     latitude: float
     longitude: float
 
+    def __post_init__(self):
+        self.mese = self.datetime.month
+
     def __str__(self):
         return f"id:{self.id} - {self.city}  [{self.state}], {self.datetime.strftime("%Y-%m-%d %H:%M:%S")}"
 

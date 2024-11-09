@@ -1,3 +1,5 @@
+import copy
+
 from database.DAO import DAO
 import networkx as nx
 
@@ -12,6 +14,8 @@ class Model:
         for a in self.listaSighting:
             self.mapSighting[a.id] = a
         self.grafo = nx.Graph()
+        self.path = []
+        self.punteggio = 0
 
     def getStatiAnno(self, anno):
         return DAO.getStatiAnno(anno)
@@ -41,5 +45,54 @@ class Model:
 
     def getNumEdges(self):
         return len(self.grafo.edges())
+
+    def getPath(self):
+        self.path = []
+        self.punteggio = 0
+        parziale = []
+        contatoriMese = {}
+        for i in range(1, 13):
+            contatoriMese[i] = 0
+        for node in self.grafo.nodes():
+            parziale.append(node)
+            contatoriMese[node.mese] += 1
+            self.ricorsione(parziale, contatoriMese)
+            parziale.remove(node)
+            contatoriMese[node.mese] -= 1
+        return self.path, self.punteggio
+
+    def ricorsione(self, parziale, contatoriMese):
+        vicini = list(self.grafo.neighbors(parziale[-1]))
+        #TERMINAZIONE
+        viciniMax = []
+        for i in vicini:
+            if i.duration > parziale[-1].duration:
+                viciniMax.append(i)
+        if len(viciniMax) == 0:
+            if self.getPuntCam(parziale) > self.punteggio:
+                self.punteggio = self.getPuntCam(parziale)
+                self.path = copy.deepcopy(parziale)
+        else:
+            for n in vicini:
+                if n.duration > parziale[-1].duration:
+                    if contatoriMese[n.mese] < 3:
+                        parziale.append(n)
+                        contatoriMese[n.mese] += 1
+                        self.ricorsione(parziale, contatoriMese)
+                        parziale.pop()
+                        contatoriMese[n.mese] -= 1
+
+    def getPuntCam(self, parziale):
+        punteggio = 0
+        for i in range(len(parziale)):
+            if i == 0:
+                punteggio += 100
+            else:
+                if parziale[i].mese == parziale[i-1].mese:
+                    punteggio += 200
+                else:
+                    punteggio += 100
+        return punteggio
+
 
 
